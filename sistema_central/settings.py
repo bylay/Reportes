@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,16 +119,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# 1. Dónde están tus archivos ahora (en tu carpeta static junto a manage.py)
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-# 2. Dónde los juntará Django cuando subas a Render (carpeta invisible 'staticfiles')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# 3. El motor que los sirve en la nube (WhiteNoise)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# USAR ESTA VERSIÓN EXACTA (Sin Manifest, solo compresión)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -140,3 +139,5 @@ LOGIN_REDIRECT_URL = '/'  # Al Dashboard principal
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 CSRF_TRUSTED_ORIGINS = ['https://erp-algas.onrender.com']
+
+WHITENOISE_USE_FINDERS = True
