@@ -1,0 +1,15 @@
+asgiref==3.9.1
+Django==4.2.8
+dnspython==2.7.0
+mariadb==1.1.14
+mysql==0.0.3
+mysql-connector-python==9.4.0
+mysqlclient==2.2.7
+packaging==25.0
+pymongo==4.13.2
+PyMySQL==1.1.2
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.2
+PyQt5_sip==12.17.0
+sqlparse==0.5.3
+tzdata==2025.2
