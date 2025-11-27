@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6usremilws+w&kti@heksw^xy)@!7v!zpa45s5=v3k+uzqzmji
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -137,3 +137,5 @@ LOGIN_REDIRECT_URL = '/'  # Al Dashboard principal
 
 # A dónde ir después de cerrar sesión
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+CSRF_TRUSTED_ORIGINS = ['https://erp-algas.onrender.com']
