@@ -12,6 +12,9 @@ import csv
 from django.http import HttpResponse
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from .forms import NuevoUsuarioForm, ProductoForm, LoteForm
+from django.contrib.auth.models import User, Group
+from django.contrib import messages
 
 @login_required
 def dashboard(request):
@@ -325,3 +328,60 @@ def menu_trabajador(request):
     Pantalla simple para que el trabajador elija qué reportar.
     """
     return render(request, 'menu_trabajador.html')
+
+
+# --- VISTA CENTRAL DE GESTIÓN ---
+@login_required
+def panel_gerencia(request):
+    # Solo gerentes pueden entrar
+    if not request.user.is_staff:
+        return redirect('menu_trabajador')
+
+    context = {
+        'usuarios': User.objects.all().order_by('-date_joined'),
+        'productos': Producto.objects.all(),
+        'lotes': LoteAves.objects.all(),
+    }
+    return render(request, 'gestion/panel_gerencia.html', context)
+
+# --- VISTAS PARA CREAR (REUTILIZAMOS UN MISMO HTML) ---
+
+@login_required
+def crear_usuario(request):
+    if request.method == 'POST':
+        form = NuevoUsuarioForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Asignar grupo Trabajadores por defecto
+            grupo = Group.objects.get(name='Trabajadores')
+            user.groups.add(grupo)
+            messages.success(request, f"Trabajador {user.username} creado correctamente.")
+            return redirect('panel_gerencia')
+    else:
+        form = NuevoUsuarioForm()
+    
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Nuevo Trabajador'})
+
+@login_required
+def crear_producto(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Producto creado exitosamente.")
+            return redirect('panel_gerencia')
+    else:
+        form = ProductoForm()
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Nuevo Producto Alga'})
+
+@login_required
+def crear_lote(request):
+    if request.method == 'POST':
+        form = LoteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lote de aves creado exitosamente.")
+            return redirect('panel_gerencia')
+    else:
+        form = LoteForm()
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Nuevo Lote Aves'})

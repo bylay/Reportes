@@ -13,18 +13,30 @@
 
     <style>
         body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; }
+        
+        /* Barra Superior */
         .navbar-custom { background-color: #1a252f; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .navbar-brand { font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; }
+
+        /* Tarjetas */
         .card { border: none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; transition: transform 0.2s; }
         .card-header { background-color: white; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: #2c3e50; padding: 15px 20px; }
         .card-header i { margin-right: 10px; color: #3498db; }
+
+        /* Botones de Filtro */
         .btn-outline-secondary.active { background-color: #34495e; color: white; border-color: #34495e; }
+
+        /* Botones de Acción Lateral */
         .btn-action { width: 100%; font-weight: 500; padding: 12px; text-align: left; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
         .btn-action i { font-size: 1.5rem; margin-right: 15px; }
+        
+        /* Tablas */
         .table thead th { border-top: none; color: #7f8c8d; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
         .table td { vertical-align: middle; font-size: 0.95rem; }
         .badge-soft-success { background-color: #d1e7dd; color: #0f5132; }
         .badge-soft-primary { background-color: #cfe2ff; color: #084298; }
+
+        /* KPI Cards */
         .kpi-value { font-size: 2rem; font-weight: 700; color: #2c3e50; }
         .kpi-label { color: #95a5a6; font-size: 0.9rem; font-weight: 500; }
     </style>
@@ -126,6 +138,14 @@
                             <span>Registrar<br>Granja</span>
                             <i class="fa-solid fa-kiwi-bird"></i>
                         </a>
+
+                        {% if user.is_superuser or user.is_staff %}
+                        <hr>
+                        <a href="{% url 'panel_gerencia' %}" class="btn btn-dark btn-action text-white shadow-sm" style="background-color: #2c3e50; border:none;">
+                            <span>Gestionar<br>Recursos</span>
+                            <i class="fa-solid fa-users-gear"></i>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -140,6 +160,7 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-list-check"></i> Historial: Planta Algas</span>
+                        
                         <a href="{% url 'exportar_algas' %}" class="btn btn-sm btn-success text-white border-0 shadow-sm">
                             <i class="fa-solid fa-file-excel"></i> Descargar Excel
                         </a>
@@ -152,7 +173,7 @@
                                     <th>Fecha</th>
                                     <th>Producto</th>
                                     <th>Cantidad</th>
-                                    <th>Responsable</th>
+                                    <th class="d-none d-md-table-cell">Responsable</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -161,7 +182,7 @@
                                     <td>{{ item.fecha_registro|date:"d M Y" }}</td>
                                     <td class="fw-bold text-dark">{{ item.producto.nombre }}</td>
                                     <td><span class="badge badge-soft-primary">+{{ item.cantidad_producida }} Kg</span></td>
-                                    <td class="text-muted"><i class="fa-regular fa-user"></i> {{ item.responsable }}</td>
+                                    <td class="text-muted d-none d-md-table-cell"><i class="fa-regular fa-user"></i> {{ item.responsable }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr><td colspan="4" class="text-center py-3">Sin registros recientes</td></tr>
@@ -174,6 +195,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-list-check"></i> Historial: Granja Experimental</span>
+                        
                         <a href="{% url 'exportar_granja' %}" class="btn btn-sm btn-success text-white border-0 shadow-sm">
                             <i class="fa-solid fa-file-excel"></i> Descargar Excel
                         </a>
@@ -186,7 +208,7 @@
                                     <th>Fecha</th>
                                     <th>Lote / Grupo</th>
                                     <th>Producción</th>
-                                    <th>Detalle</th>
+                                    <th class="d-none d-md-table-cell">Detalle</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -202,7 +224,7 @@
                                         {% endif %}
                                     </td>
                                     <td><span class="badge badge-soft-primary">{{ item.huevos_recolectados }} Huevos</span></td>
-                                    <td class="text-muted small">{{ item.observaciones|default:"-"|truncatechars:20 }}</td>
+                                    <td class="text-muted small d-none d-md-table-cell">{{ item.observaciones|default:"-"|truncatechars:20 }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr><td colspan="4" class="text-center py-3">Sin registros recientes</td></tr>
@@ -222,6 +244,7 @@
     </div>
 
     <script>
+        // Función descarga imágenes PNG
         function descargarGrafico(canvasId, nombreArchivo) {
             const canvas = document.getElementById(canvasId);
             const link = document.createElement('a');
@@ -230,12 +253,14 @@
             link.click();
         }
 
+        // Datos inyectados desde Python
         const nombresProductos = {{ nombres_prod|safe }};
         const stockProductos = {{ stock_prod|safe }};
         const proyeccionProductos = {{ proyeccion_prod|safe }};
         const rendimientoAlgas = {{ rendimiento_algas|stringformat:'f' }};
         const rendimientoControl = {{ rendimiento_control|stringformat:'f' }};
 
+        // Gráfico 1
         const ctxGallinas = document.getElementById('graficoGallinas').getContext('2d');
         new Chart(ctxGallinas, {
             type: 'bar',
@@ -260,6 +285,7 @@
             }
         });
 
+        // Gráfico 2
         const ctxInventario = document.getElementById('graficoInventario').getContext('2d');
         new Chart(ctxInventario, {
             type: 'bar',
