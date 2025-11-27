@@ -121,6 +121,12 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+import os  # Asegúrate de importar esto si te da error, o ponlo arriba del todo
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 2. Le decimos que use WhiteNoise para servir los archivos comprimidos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
