@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producción Algas | AlgasBio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#006064">
+
+    <style>
+        body { background-color: #e0f7fa; font-family: 'Segoe UI', sans-serif; }
+        .card-custom { border: none; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header-bg { background: linear-gradient(135deg, #006064, #0097a7); color: white; border-radius: 15px 15px 0 0; padding: 20px; }
+        
+        /* Estilos Offline */
+        #status-bar { padding: 10px; margin-bottom: 15px; border-radius: 8px; font-weight: bold; text-align: center; display: none; }
+        .online { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .offline { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+        .btn-submit { background-color: #00838f; border: none; padding: 12px; font-size: 1.1rem; font-weight: 600; }
+        .btn-submit:hover { background-color: #006064; }
+    </style>
+</head>
+<body class="py-4">
+
+    <div class="container" style="max-width: 500px;">
+        
+        <div class="card card-custom">
+            <div class="header-bg text-center">
+                <h3 class="mb-0"><i class="fa-solid fa-water"></i> Planta Algas</h3>
+                <small>Registro de Cosecha y Producción</small>
+            </div>
+            
+            <div class="card-body p-4">
+                
+                <div id="status-bar"></div>
+
+                <form id="form-produccion">
+                    
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="producto" required>
+                            <option value="" selected disabled>Seleccione una opción</option>
+                            {% for p in productos %}
+                                <option value="{{ p.id }}">{{ p.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="producto"><i class="fa-solid fa-box-open"></i> Producto</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="cantidad" step="0.01" placeholder="0.00" required>
+                        <label for="cantidad"><i class="fa-solid fa-scale-balanced"></i> Cantidad (Kg / Litros)</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input type="text" class="form-control" id="responsable" placeholder="Nombre" required>
+                        <label for="responsable"><i class="fa-regular fa-id-card"></i> Nombre del Trabajador</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-submit w-100 shadow-sm">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Reporte
+                    </button>
+
+                </form>
+            </div>
+            <div class="card-footer text-center bg-white border-0 pb-3">
+                <a href="/" class="text-decoration-none text-muted small">
+                    <i class="fa-solid fa-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'js/sw.js' %}");
+            });
+        }
+    </script>
+</body>
+</html>
