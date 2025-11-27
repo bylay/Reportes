@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg, Sum
 from django.utils import timezone
 from decimal import Decimal
@@ -15,6 +15,10 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from .forms import NuevoUsuarioForm, ProductoForm, LoteForm
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
+from django.conf import settings
+from django.http import HttpResponse
+import os
+
 
 @login_required
 def dashboard(request):
@@ -385,3 +389,101 @@ def crear_lote(request):
     else:
         form = LoteForm()
     return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Nuevo Lote Aves'})
+
+
+def service_worker(request):
+    """
+    Sirve el archivo sw.js directamente desde la raíz para que tenga permisos sobre todo el sitio.
+    """
+    # Buscamos el archivo en tu carpeta static/js
+    sw_path = os.path.join(settings.BASE_DIR, 'static', 'js', 'sw.js')
+    
+    try:
+        with open(sw_path, 'r') as f:
+            content = f.read()
+        return HttpResponse(content, content_type='application/javascript')
+    except FileNotFoundError:
+        return HttpResponse("Service Worker no encontrado", status=404)
+
+def manifest(request):
+    """
+    Sirve el manifest.json directamente desde la raíz.
+    """
+    manifest_path = os.path.join(settings.BASE_DIR, 'static', 'manifest.json')
+    
+    try:
+        with open(manifest_path, 'r') as f:
+            content = f.read()
+        return HttpResponse(content, content_type='application/json')
+    except FileNotFoundError:
+        return HttpResponse("Manifest no encontrado", status=404)
+    
+
+@login_required
+def editar_usuario(request, id):
+    user_obj = get_object_or_404(User, id=id)
+    if request.method == 'POST':
+        form = NuevoUsuarioForm(request.POST, instance=user_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Usuario actualizado correctamente.")
+            return redirect('panel_gerencia')
+    else:
+        # Prellenamos el campo "nombre" que no es nativo del modelo User en el form
+        form = NuevoUsuarioForm(instance=user_obj, initial={'nombre': user_obj.first_name})
+    
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Editar Usuario'})
+
+@login_required
+def eliminar_usuario(request, id):
+    user_obj = get_object_or_404(User, id=id)
+    if not user_obj.is_superuser: # Seguridad: No borrar al jefe supremo
+        user_obj.delete()
+        messages.success(request, "Usuario eliminado.")
+    else:
+        messages.error(request, "No puedes eliminar al Superadministrador.")
+    return redirect('panel_gerencia')
+
+
+# 2. PRODUCTOS (ALGAS)
+@login_required
+def editar_producto(request, id):
+    prod = get_object_or_404(Producto, id=id)
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=prod)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Producto actualizado.")
+            return redirect('panel_gerencia')
+    else:
+        form = ProductoForm(instance=prod)
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Editar Producto'})
+
+@login_required
+def eliminar_producto(request, id):
+    prod = get_object_or_404(Producto, id=id)
+    prod.delete()
+    messages.success(request, "Producto eliminado.")
+    return redirect('panel_gerencia')
+
+
+# 3. LOTES (AVES)
+@login_required
+def editar_lote(request, id):
+    lote = get_object_or_404(LoteAves, id=id)
+    if request.method == 'POST':
+        form = LoteForm(request.POST, instance=lote)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lote actualizado.")
+            return redirect('panel_gerencia')
+    else:
+        form = LoteForm(instance=lote)
+    return render(request, 'gestion/crear_generico.html', {'form': form, 'titulo': 'Editar Lote'})
+
+@login_required
+def eliminar_lote(request, id):
+    lote = get_object_or_404(LoteAves, id=id)
+    lote.delete()
+    messages.success(request, "Lote eliminado.")
+    return redirect('panel_gerencia')

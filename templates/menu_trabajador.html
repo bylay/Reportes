@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a252f">
 
     <style>
@@ -64,6 +64,17 @@
             Sistema AlgasBio v1.0
         </div>
     </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // CAMBIO IMPORTANTE: Quitamos {% static ... %} y ponemos la ruta directa
+                navigator.serviceWorker.register("/sw.js")
+                    .then(reg => console.log('SW registrado en la raíz! 😎', reg.scope))
+                    .catch(err => console.log('Fallo SW:', err));
+            });
+        }
+    </script>
 
 </body>
 </html>
