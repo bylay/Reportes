@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; }
@@ -67,16 +68,21 @@
     <div class="container mt-4">
 
         <div class="row align-items-center mb-4">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <h4 class="mb-0 text-dark" style="font-weight: 700;">Resumen Ejecutivo</h4>
-                <p class="text-muted mb-0">Periodo de análisis: <span class="fw-bold text-primary">{{ titulo_periodo }}</span></p>
+                <p class="text-muted mb-0">Periodo: <span class="fw-bold text-primary">{{ titulo_periodo }}</span></p>
             </div>
-            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            
+            <div class="col-md-7 text-md-end mt-3 mt-md-0 d-flex justify-content-end gap-2">
                 <div class="btn-group" role="group">
                     <a href="?dias=7" class="btn btn-outline-secondary {% if dias_actual == 7 %}active{% endif %}">7 Días</a>
-                    <a href="?dias=30" class="btn btn-outline-secondary {% if dias_actual == 30 %}active{% endif %}">Mes Actual</a>
-                    <a href="?dias=365" class="btn btn-outline-secondary {% if dias_actual == 365 %}active{% endif %}">Anual</a>
+                    <a href="?dias=30" class="btn btn-outline-secondary {% if dias_actual == 30 %}active{% endif %}">Mes</a>
+                    <a href="?dias=365" class="btn btn-outline-secondary {% if dias_actual == 365 %}active{% endif %}">Año</a>
                 </div>
+
+                <button onclick="generarPDF()" class="btn btn-danger shadow-sm">
+                    <i class="fa-solid fa-file-pdf"></i> PDF Oficial
+                </button>
             </div>
         </div>
 
@@ -322,6 +328,50 @@
                 }
             }
         });
+
+        function generarPDF() {
+        // 1. Obtener fecha actual para el reporte
+        const fecha = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('fecha-reporte').textContent = fecha;
+
+        // 2. Clonar el gráfico de gallinas para que salga en el PDF
+        // (Chart.js es especial, necesitamos convertirlo a imagen primero)
+        const canvasOriginal = document.getElementById('graficoGallinas');
+        const imagenGrafico = canvasOriginal.toDataURL('image/png'); // Convertimos a foto
+        
+        // Buscamos el canvas del reporte y dibujamos la imagen
+        const canvasReporte = document.getElementById('canvas-reporte-gallinas');
+        const ctxReporte = canvasReporte.getContext('2d');
+        
+        // Ajustamos tamaño
+        canvasReporte.width = canvasOriginal.width;
+        canvasReporte.height = canvasOriginal.height;
+
+        const img = new Image();
+        img.onload = function() {
+            ctxReporte.drawImage(img, 0, 0);
+            
+            // 3. AHORA SÍ, GENERAMOS EL PDF
+            const elemento = document.getElementById('reporte-oficial');
+            
+            // Hacemos visible el div temporalmente para la foto
+            elemento.style.display = 'block';
+
+            const opciones = {
+                margin:       0.5, // Márgenes en pulgadas
+                filename:     'Reporte_Eficiencia_AlgasBio.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 }, // Alta resolución
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Promesa: Generar -> Guardar -> Ocultar de nuevo
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                elemento.style.display = 'none'; // Lo volvemos a ocultar
+            });
+        };
+        img.src = imagenGrafico;
+    }
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -333,5 +383,69 @@
             }, 100);
         });
     </script>
+    <div id="reporte-oficial" style="display: none;">
+    <div style="padding: 40px; font-family: 'Times New Roman', serif; color: #000; background: white;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a252f; padding-bottom: 20px; margin-bottom: 30px;">
+            <div>
+                <h1 style="margin: 0; color: #1a252f; font-size: 24px;">ALGAS BIOTECH S.A.</h1>
+                <p style="margin: 5px 0 0; font-size: 12px; color: #666;">Innovación en Nutrición Animal</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0; font-weight: bold;">REPORTE DE EFICIENCIA</p>
+                <p style="margin: 0; font-size: 12px;">Fecha: <span id="fecha-reporte"></span></p>
+            </div>
+        </div>
+
+        <h3 style="color: #006064; border-left: 5px solid #006064; padding-left: 10px;">1. Análisis de Productividad Comparada</h3>
+        <p style="text-align: justify; line-height: 1.5;">
+            El presente informe certifica los resultados obtenidos en nuestros lotes experimentales. 
+            Se ha realizado una comparación directa entre la dieta estándar y nuestra dieta enriquecida con algas.
+        </p>
+
+        <div style="width: 100%; height: 350px; margin: 30px 0; border: 1px solid #eee; padding: 10px;">
+            <canvas id="canvas-reporte-gallinas"></canvas>
+        </div>
+
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 30px;">
+            <strong>📌 Conclusión Técnica:</strong>
+            <p style="margin-top: 10px;">
+                Los datos demuestran que el grupo <strong>{{ ganador }}</strong> presenta un rendimiento superior 
+                en la tasa de postura. La dieta basada en algas ha demostrado incrementar la eficiencia biológica, 
+                siendo una alternativa viable y rentable para la industria avícola internacional.
+            </p>
+        </div>
+
+        <h3 style="color: #e65100; border-left: 5px solid #e65100; padding-left: 10px;">2. Capacidad de Suministro (Proyección)</h3>
+        <p>
+            Algas Biotech S.A. garantiza la siguiente capacidad instalada y proyección de entrega inmediata 
+            para cubrir la demanda del próximo mes:
+        </p>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+            <thead>
+                <tr style="background-color: #1a252f; color: white;">
+                    <th style="padding: 10px; text-align: left;">Producto</th>
+                    <th style="padding: 10px; text-align: right;">Stock Disponible</th>
+                    <th style="padding: 10px; text-align: right;">Capacidad Mensual</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in proyeccion_prod %}
+                    {% endfor %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 10px;">Alimento Balanceado Algas</td>
+                    <td style="padding: 10px; text-align: right;">(Ver Anexo Inventario)</td>
+                    <td style="padding: 10px; text-align: right;"><strong>Alta Disponibilidad</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p>Este documento ha sido generado automáticamente por el sistema ERP de Algas Biotech S.A.</p>
+            <p>Contacto: comercial@algasbiotech.com | www.algasbiotech.com</p>
+        </div>
+    </div>
+</div>
 </body>
 </html>
