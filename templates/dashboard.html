@@ -358,11 +358,13 @@
             elemento.style.display = 'block';
 
             const opciones = {
-                margin:       0.5, // Márgenes en pulgadas
+                margin:       0.5,
                 filename:     'Reporte_Eficiencia_AlgasBio.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 }, // Alta resolución
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+                // --- AGREGA ESTA LÍNEA NUEVA ---
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
             };
 
             // Promesa: Generar -> Guardar -> Ocultar de nuevo
@@ -416,30 +418,40 @@
             </p>
         </div>
 
-        <h3 style="color: #e65100; border-left: 5px solid #e65100; padding-left: 10px;">2. Capacidad de Suministro (Proyección)</h3>
-        <p>
-            Algas Biotech S.A. garantiza la siguiente capacidad instalada y proyección de entrega inmediata 
-            para cubrir la demanda del próximo mes:
-        </p>
+        <div style="page-break-inside: avoid; break-inside: avoid;">
+            
+            <h3 style="color: #e65100; border-left: 5px solid #e65100; padding-left: 10px; margin-top: 20px;">
+                2. Capacidad de Suministro (Proyección)
+            </h3>
+            
+            <p>
+                Algas Biotech S.A. garantiza la siguiente capacidad instalada y proyección de entrega inmediata 
+                para cubrir la demanda del próximo mes:
+            </p>
 
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-            <thead>
-                <tr style="background-color: #1a252f; color: white;">
-                    <th style="padding: 10px; text-align: left;">Producto</th>
-                    <th style="padding: 10px; text-align: right;">Stock Disponible</th>
-                    <th style="padding: 10px; text-align: right;">Capacidad Mensual</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in proyeccion_prod %}
-                    {% endfor %}
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="padding: 10px;">Alimento Balanceado Algas</td>
-                    <td style="padding: 10px; text-align: right;">(Ver Anexo Inventario)</td>
-                    <td style="padding: 10px; text-align: right;"><strong>Alta Disponibilidad</strong></td>
-                </tr>
-            </tbody>
-        </table>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
+                <thead>
+                    <tr style="background-color: #1a252f; color: white;">
+                        <th style="padding: 10px; text-align: left;">Producto</th>
+                        <th style="padding: 10px; text-align: right;">Stock Disponible</th>
+                        <th style="padding: 10px; text-align: right;">Capacidad Mensual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">Alimento Balanceado Algas</td>
+                        <td style="padding: 10px; text-align: right;">(Según Inventario Actual)</td>
+                        <td style="padding: 10px; text-align: right; color: #27ae60; font-weight: bold;">Alta Disponibilidad</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">Materia Prima (Algas Secas)</td>
+                        <td style="padding: 10px; text-align: right;">(Según Cosecha)</td>
+                        <td style="padding: 10px; text-align: right; color: #e67e22;">Stock Limitado</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </div>
 
         <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 20px;">
             <p>Este documento ha sido generado automáticamente por el sistema ERP de Algas Biotech S.A.</p>
